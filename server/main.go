@@ -6,18 +6,19 @@ import (
 	"os"
 
 	"./api"
+	"./homepage"
 )
 
 func main() {
 	logger := log.New(os.Stdout, "gcuk ", log.LstdFlags|log.Lshortfile)
 
-	//h := homepage.NewHandlers(logger)
-	//todo := todo.NewHandlers(logger)
-	api := api.NewHandlers(logger)
+	//define mux
 	mux := http.NewServeMux()
-	api.SetupRoutes(mux)
-	fs := http.FileServer(http.Dir("../client/build"))
-	mux.Handle("/", fs)
+	// grab routes
+	api.AddAPIHandler(mux)
+	homepage.AddHomepageHandler(mux)
+
+	// start server
 	logger.Println("server starting")
 	err := http.ListenAndServe(":8000", mux)
 	if err != nil {
