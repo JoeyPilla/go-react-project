@@ -1,17 +1,26 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
+	"os"
+
+	"./api"
 )
 
 func main() {
+	logger := log.New(os.Stdout, "gcuk ", log.LstdFlags|log.Lshortfile)
+
+	//h := homepage.NewHandlers(logger)
+	//todo := todo.NewHandlers(logger)
+	api := api.NewHandlers(logger)
+	mux := http.NewServeMux()
+	api.SetupRoutes(mux)
 	fs := http.FileServer(http.Dir("../client/build"))
-	http.Handle("/", fs)
-	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello from server!")
-	})
-	log.Println("Listening...")
-	http.ListenAndServe(":3000", nil)
+	mux.Handle("/", fs)
+	logger.Println("server starting")
+	err := http.ListenAndServe(":8000", mux)
+	if err != nil {
+		logger.Fatalf("server failed to start: %v", err)
+	}
 }
